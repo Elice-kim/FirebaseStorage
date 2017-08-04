@@ -1,19 +1,30 @@
 package com.fortest.elice.firebasestorage;
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
-/**open camera
+/**
+ * open camera
  * upload firebase storage
- * and download image */
+ * and download image
+ */
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int PERMISSION_CHECK = 100;
     @BindView(R.id.cameraFabBtn)
     FloatingActionButton cameraFabBtn;
     @BindView(R.id.storageImageView)
@@ -27,4 +38,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @OnClick(R.id.cameraFabBtn)
+    void cameraFabBtnClicked() {
+        int permission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (permission == PackageManager.PERMISSION_GRANTED) {
+            startGalleryPick();
+        } //처음에 권한 허가가 되어있지 않으므로 가장 처음에 퍼미션 요청하는 부분
+        else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_CHECK);
+        }
+    }
+
+    //퍼미션 요청 후 결과에 해당 되는 부분
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode == PERMISSION_CHECK){
+            if(grantResults[0]==PackageManager.PERMISSION_GRANTED && grantResults.length>0){
+                startGalleryPick();
+            }else return;
+        }
+
+    }
+
+    private void startGalleryPick() {
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK);
+        galleryIntent.setType(MediaStore.Images.Media.CONTENT_TYPE);
+        galleryIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivity(galleryIntent);
+    }
 }
