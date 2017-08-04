@@ -3,6 +3,7 @@ package com.fortest.elice.firebasestorage;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -11,6 +12,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
+
+import com.bumptech.glide.Glide;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -25,6 +28,7 @@ import butterknife.OnClick;
 public class MainActivity extends AppCompatActivity {
 
     private static final int PERMISSION_CHECK = 100;
+    private static final int PERMISSION_OK = 200;
     @BindView(R.id.cameraFabBtn)
     FloatingActionButton cameraFabBtn;
     @BindView(R.id.storageImageView)
@@ -66,6 +70,19 @@ public class MainActivity extends AppCompatActivity {
         Intent galleryIntent = new Intent(Intent.ACTION_PICK);
         galleryIntent.setType(MediaStore.Images.Media.CONTENT_TYPE);
         galleryIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivity(galleryIntent);
+        startActivityForResult(galleryIntent, PERMISSION_OK);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==PERMISSION_OK && resultCode==RESULT_OK){
+            Uri uri = data.getData();
+            Glide.with(this)
+                    .load(uri)
+                    .into(storageImageView);
+
+
+        }
     }
 }
