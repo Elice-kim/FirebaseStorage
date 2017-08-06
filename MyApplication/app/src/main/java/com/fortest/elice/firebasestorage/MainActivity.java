@@ -12,8 +12,12 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,6 +33,11 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int PERMISSION_CHECK = 100;
     private static final int PERMISSION_OK = 200;
+
+    private FirebaseStorage storage;
+    private StorageReference storageRef;
+    private StorageReference mountainImagesRef;
+
     @BindView(R.id.cameraFabBtn)
     FloatingActionButton cameraFabBtn;
     @BindView(R.id.storageImageView)
@@ -39,6 +48,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        setUpforFireBase();
+
+
+    }
+
+    private void setUpforFireBase() {
+        storage = FirebaseStorage.getInstance();
+        // Create a storage reference from our app
+        storageRef = storage.getReferenceFromUrl(Constant.STORAGE_URL);
     }
 
 
@@ -63,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
                 startGalleryPick();
             }else return;
         }
-
     }
 
     private void startGalleryPick() {
@@ -82,7 +100,15 @@ public class MainActivity extends AppCompatActivity {
                     .load(uri)
                     .into(storageImageView);
 
-
+            //image uploading 
+            StorageReference riversRef = storageRef.child("images/1.jpg");
+            UploadTask uploadTask = riversRef.putFile(uri);
+            uploadTask.addOnFailureListener(e->{
+                    // Handle unsuccessful uploads
+                    Toast.makeText(MainActivity.this, "이미지 업로드 실패", Toast.LENGTH_SHORT).show();
+            }).addOnSuccessListener(taskSnapshot -> {
+                    Toast.makeText(MainActivity.this, "이미지 업로드 성공", Toast.LENGTH_SHORT).show();
+            });
         }
     }
 }
